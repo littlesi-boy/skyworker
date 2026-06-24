@@ -1,0 +1,150 @@
+<view class="safe-page work-page skin-{{activeSkin.tone}}">
+  <view class="topbar">
+    <view class="rank-block">
+      <text class="rank-title">{{rank.title}}</text>
+      <text class="rank-tier">{{rank.tier}} · {{profile.totalScore}}/{{rank.threshold}}分</text>
+    </view>
+    <view class="timer">{{timeLeft}}s</view>
+  </view>
+
+  <view class="game-shell">
+    <view class="guide" wx:if="{{showGuide}}">敲亮代码屏，照顾心态舱；任意一项归零就会崩盘</view>
+
+    <view class="meters">
+      <view class="meter-zone progress-zone" bindtap="tapProgress">
+        <view class="machine-tag">开发终端</view>
+        <view class="dev-device">
+          <view class="code-screen">
+            <view class="scan-line"></view>
+            <view class="code-fill" style="height: {{progress}}%;">
+              <text class="code-rain rain-a">0101</text>
+              <text class="code-rain rain-b">merge</text>
+              <text class="code-rain rain-c">npm run build</text>
+              <text class="code-line">const bug = fix();</text>
+              <text class="code-line short">git push origin</text>
+              <text class="code-line">deploy.status = green</text>
+              <text class="code-line dim">while(task) focus++</text>
+              <text class="code-line">progress += commit</text>
+            </view>
+            <view class="screen-glare"></view>
+            <view class="perfect-line device-line"></view>
+          </view>
+        </view>
+        <text class="meter-value">{{progressText}}%</text>
+        <text class="meter-title">开发进度</text>
+        <text class="meter-note">改bug / 联调 / 线上排障</text>
+      </view>
+
+      <view class="meter-zone mood-zone" bindtap="tapMood">
+        <view class="machine-tag mood-tag">心态反应炉</view>
+        <view class="mood-device mood-{{moodLevel}}">
+          <view class="pressure-gauge">
+            <view class="gauge-dot"></view>
+            <view class="gauge-bar" style="width: {{mood}}%;"></view>
+          </view>
+          <view class="mood-glass">
+            <view class="heart-stack" style="height: {{mood}}%;">
+              <view class="heart-bubble heart-a"></view>
+              <view class="heart-bubble heart-b"></view>
+              <view class="heart-bubble heart-c"></view>
+              <view class="heart-bubble heart-d"></view>
+              <view class="heart-bubble heart-e"></view>
+              <view class="heart-bubble heart-f"></view>
+              <view class="heart-bubble heart-g"></view>
+              <view class="heart-bubble heart-h"></view>
+              <view class="mood-bubble bubble-a"></view>
+              <view class="mood-bubble bubble-b"></view>
+              <view class="mood-bubble bubble-c"></view>
+              <view class="mood-bubble bubble-d"></view>
+            </view>
+            <view class="main-heart">
+              <view class="heart-shape"></view>
+              <view class="heart-eye left-eye"></view>
+              <view class="heart-eye right-eye"></view>
+              <view class="heart-mouth"></view>
+            </view>
+            <view class="mood-mark left"></view>
+            <view class="mood-mark right"></view>
+            <view class="perfect-line mood-line"></view>
+          </view>
+          <view class="mood-label">心态舱</view>
+        </view>
+        <text class="meter-value">{{moodText}}%</text>
+        <text class="meter-title">心态指数</text>
+        <text class="meter-note">呼吸 / 喝水 / 稳住</text>
+      </view>
+    </view>
+
+    <view class="event-toast" wx:if="{{eventToast}}">
+      <text class="event-title">{{eventToast.title}}</text>
+      <text>{{eventToast.desc}}</text>
+    </view>
+
+    <view class="overtime-pop soft-card" wx:if="{{overtimeModal}}">
+      <text class="overtime-title">【{{overtimeModal.title}}】</text>
+      <text class="overtime-desc">{{overtimeModal.desc}}</text>
+      <button class="primary-btn tiny" bindtap="acceptOvertime">{{overtimeModal.accept}}</button>
+      <button class="ghost-btn tiny" bindtap="rejectOvertime">{{overtimeModal.reject}}</button>
+    </view>
+
+    <view class="workspace soft-card">
+      <view class="desk-scene">
+        <view class="monitor">
+          <view class="screen-line short"></view>
+          <view class="screen-line"></view>
+          <view class="screen-line dim"></view>
+        </view>
+        <view class="desk"></view>
+        <view class="badge" wx:if="{{profile.rankIndex === maxRankIndex}}">毕业</view>
+        <button class="game-control {{status === 'running' && !paused ? 'playing' : ''}}" bindtap="controlGame">
+          <text class="control-icon">{{status === 'running' && !paused ? 'Ⅱ' : '▶'}}</text>
+          <text class="control-text">{{status === 'running' && !paused ? '暂停摸鱼' : '开始上工'}}</text>
+        </button>
+      </view>
+      <text class="workspace-title">{{activeSkin.name}}</text>
+      <text class="workspace-desc">{{rank.workspace}}</text>
+    </view>
+
+    <view class="item-dock">
+      <button class="item-btn" wx:for="{{itemDock}}" wx:key="id" data-id="{{item.id}}" bindtap="useItem">
+        <text class="item-icon">{{item.icon}}</text>
+        <text class="item-count">x{{item.count}}</text>
+        <text class="item-name">{{item.shortName}}</text>
+      </button>
+    </view>
+  </view>
+
+  <view class="fail-slam {{failOverlay.reason}}" wx:if="{{failOverlay}}">
+    <view class="slam-line"></view>
+    <text class="slam-title">{{failOverlay.title}}</text>
+    <text class="slam-copy">本局强制结束，先把自己捞回来。</text>
+  </view>
+
+  <view class="modal-mask" wx:if="{{resultModal}}">
+    <view class="result-card soft-card {{resultModal.type}}">
+      <view class="mascot">{{resultModal.type === 'success' ? '✦' : '☁'}}</view>
+      <text class="result-title">{{resultModal.title}}</text>
+      <text class="result-copy">{{resultModal.copy}}</text>
+      <view class="reward-list" wx:if="{{resultModal.rewards.length}}">
+        <text wx:for="{{resultModal.rewards}}" wx:key="*this" class="reward-chip">{{item}}</text>
+      </view>
+      <view class="result-actions" wx:if="{{resultModal.type === 'fail'}}">
+        <button class="primary-btn" bindtap="reviveByAd">观看广告，原地复活</button>
+        <button class="ghost-btn" bindtap="reviveByShare">分享好友，免费复活</button>
+      </view>
+      <button class="ghost-btn" bindtap="closeResult">{{resultModal.type === 'success' ? '收下奖励' : '关闭退出'}}</button>
+    </view>
+  </view>
+
+  <view class="modal-mask" wx:if="{{checkInModal}}">
+    <view class="result-card soft-card success">
+      <view class="mascot">✓</view>
+      <text class="result-title">今日上工自动打卡成功</text>
+      <text class="result-copy">{{checkInModal.copy}}</text>
+      <view class="reward-list" wx:if="{{checkInModal.reward}}">
+        <text class="reward-chip">{{checkInModal.reward}}</text>
+      </view>
+      <button class="primary-btn" bindtap="closeCheckIn">知道了</button>
+    </view>
+  </view>
+</view>

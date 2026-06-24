@@ -1,0 +1,31 @@
+{
+  "pages": [
+    "pages/work/work",
+    "pages/space/space",
+    "pages/profile/profile"
+  ],
+  "window": {
+    "navigationBarTitleText": "天工一号",
+    "navigationBarBackgroundColor": "#f5f7f3",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f5f7f3"
+  },
+  "tabBar": {
+    "color": "#6f766f",
+    "selectedColor": "#2f5f50",
+    "backgroundColor": "#fbfcf8",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/work/work",
+        "text": "上工"
+      },
+      {
+        "pagePath": "pages/space/space",
+        "text": "空间"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

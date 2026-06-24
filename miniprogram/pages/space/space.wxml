@@ -1,0 +1,87 @@
+<view class="safe-page space-page skin-{{activeSkin.tone}}">
+  <view class="profile-card soft-card" bindtap="openProfile">
+    <view class="avatar-wrap">
+      <image wx:if="{{profile.avatarUrl}}" class="avatar" src="{{profile.avatarUrl}}" mode="aspectFill"></image>
+      <view wx:else class="avatar placeholder">工</view>
+    </view>
+    <view class="identity">
+      <text class="nickname">{{profile.nickname}}</text>
+      <text class="rank">{{rank.title}} · {{rank.tier}}</text>
+      <text class="motto">{{profile.motto}}</text>
+    </view>
+    <text class="profile-more">编辑</text>
+  </view>
+
+  <view class="quick-row">
+    <view class="stat soft-card">
+      <text class="stat-num">{{profile.totalScore}}</text>
+      <text class="stat-label">总晋升积分</text>
+    </view>
+    <view class="stat soft-card">
+      <text class="stat-num">{{profile.passCount}}</text>
+      <text class="stat-label">累计通关</text>
+    </view>
+    <view class="stat soft-card">
+      <text class="stat-num">{{profile.checkInStreak}}</text>
+      <text class="stat-label">连续打卡</text>
+    </view>
+  </view>
+
+  <view class="checkin soft-card">
+    <view>
+      <text class="section-title">每日打卡</text>
+      <text class="section-copy">{{checkedInToday ? '今日已完成打卡' : '今天还没有打卡'}}</text>
+    </view>
+    <button class="primary-btn mini" bindtap="manualCheckIn">手动打卡</button>
+  </view>
+
+  <view class="tabs">
+    <button class="tab {{activeTab === 'skins' ? 'active' : ''}}" data-tab="skins" bindtap="switchTab">我的皮肤</button>
+    <button class="tab {{activeTab === 'growth' ? 'active' : ''}}" data-tab="growth" bindtap="switchTab">成长档案</button>
+    <button class="tab {{activeTab === 'records' ? 'active' : ''}}" data-tab="records" bindtap="switchTab">历史</button>
+  </view>
+
+  <view wx:if="{{activeTab === 'skins'}}" class="panel">
+    <view class="skin-grid">
+      <view class="skin-card soft-card {{profile.activeSkin === item.id ? 'selected' : ''}}" wx:for="{{ownedSkins}}" wx:key="id">
+        <view class="skin-preview tone-{{item.tone}}"></view>
+        <text class="skin-name">{{item.name}}</text>
+        <text class="skin-rarity">{{item.rarity}}</text>
+        <button class="ghost-btn mini" data-id="{{item.id}}" bindtap="switchSkin">{{profile.activeSkin === item.id ? '使用中' : '切换'}}</button>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{activeTab === 'growth'}}" class="panel growth">
+    <view class="stats-grid">
+      <view class="stat soft-card" wx:for="{{growthStats}}" wx:key="label">
+        <text class="stat-num">{{item.value}}</text>
+        <text class="stat-label">{{item.label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{activeTab === 'records'}}" class="panel growth">
+    <view class="records soft-card">
+      <text class="section-title">历史对局记录</text>
+      <view wx:if="{{!profile.records.length}}" class="empty">暂无记录，去上工页开一局试试。</view>
+      <view class="record" wx:for="{{profile.records}}" wx:key="id">
+        <view>
+          <text class="record-title">{{item.result}} · {{item.time}}s</text>
+          <text class="record-copy">{{item.overtime === '无' ? '未加班' : '已加班'}} · {{item.perfect ? '完美通关' : '普通记录'}}</text>
+        </view>
+        <text class="record-reward">{{item.rewards}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="modal-mask" wx:if="{{checkInModal}}">
+    <view class="result-card soft-card">
+      <view class="mascot">✓</view>
+      <text class="result-title">今日上工打卡成功</text>
+      <text class="result-copy">{{checkInModal.copy}}</text>
+      <text wx:if="{{checkInModal.reward}}" class="reward-chip">{{checkInModal.reward}}</text>
+      <button class="primary-btn" bindtap="closeCheckIn">领取</button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,53 @@
+<view class="safe-page profile-page skin-{{activeSkin.tone}}">
+  <view class="profile-panel soft-card">
+    <button class="avatar-button" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <image wx:if="{{form.avatarUrl}}" class="avatar" src="{{form.avatarUrl}}" mode="aspectFill"></image>
+      <view wx:else class="avatar placeholder">工</view>
+    </button>
+    <view class="profile-fields">
+      <input class="nickname-input" type="nickname" maxlength="12" value="{{form.nickname}}" bindinput="onNicknameInput" placeholder="微信昵称" />
+      <input class="motto-input" maxlength="20" value="{{form.motto}}" bindinput="onMottoInput" placeholder="写一句打工宣言" />
+    </view>
+  </view>
+
+  <view class="list-panel soft-card">
+    <view class="info-row">
+      <text class="row-label">当前级别</text>
+      <text class="row-value">{{rank.title}}</text>
+    </view>
+    <view class="info-row">
+      <text class="row-label">职场身份</text>
+      <text class="row-value">{{rank.tier}}</text>
+    </view>
+    <view class="info-row">
+      <text class="row-label">头像</text>
+      <button class="mini ghost-btn" bindtap="chooseLocalAvatar">本地上传</button>
+    </view>
+    <view class="info-row">
+      <text class="row-label">自动打卡</text>
+      <switch checked="{{profile.autoCheckIn}}" bindchange="toggleAutoCheckIn" color="#2f5f50" />
+    </view>
+    <view class="info-row">
+      <text class="row-label">今日打卡</text>
+      <button class="mini primary-btn" bindtap="manualCheckIn">{{checkedInToday ? '已完成' : '手动打卡'}}</button>
+    </view>
+    <view class="info-row">
+      <text class="row-label">个人资料</text>
+      <button class="mini primary-btn" bindtap="saveProfileInfo">保存</button>
+    </view>
+    <view class="info-row danger-row">
+      <text class="row-label">清空战绩</text>
+      <button class="mini danger-btn" bindtap="clearRecords">清空</button>
+    </view>
+  </view>
+
+  <view class="modal-mask" wx:if="{{checkInModal}}">
+    <view class="result-card soft-card">
+      <view class="mascot">✓</view>
+      <text class="result-title">今日上班打卡成功</text>
+      <text class="result-copy">{{checkInModal.copy}}</text>
+      <text wx:if="{{checkInModal.reward}}" class="reward-chip">{{checkInModal.reward}}</text>
+      <button class="primary-btn" bindtap="closeCheckIn">领取</button>
+    </view>
+  </view>
+</view>
