@@ -1,5 +1,5 @@
-const { RANKS, SKINS, ITEMS, CHECKIN_TEXTS } = require('../../utils/config');
-const { loadProfile, saveProfile, randomFrom, randomSkin, todayKey, trackEvent } = require('../../utils/store');
+const { RANKS, SKINS, ITEMS } = require('../../utils/config');
+const { loadProfile, saveProfile, todayKey, trackEvent, shouldAutoCheckIn, checkInProfile, isSkinUnlocked, isFormalProfile } = require('../../utils/store');
 
 Page({
   data: {
@@ -20,13 +20,21 @@ Page({
 
   onShow() {
     this.refresh();
+    if (wx.getStorageSync('pendingAutoCheckIn')) {
+      wx.removeStorageSync('pendingAutoCheckIn');
+      this.tryAutoCheckInFromAppShow();
+    }
   },
 
   refresh() {
     const profile = loadProfile();
     const rank = RANKS[profile.rankIndex];
     const activeSkin = SKINS.find((skin) => skin.id === profile.activeSkin) || SKINS[0];
-    const ownedSkins = SKINS.filter((skin) => profile.skins.includes(skin.id));
+    const ownedSkins = SKINS
+      .filter((skin) => profile.skins.includes(skin.id) || skin.unlockRankIndex !== undefined)
+      .map((skin) => Object.assign({}, skin, {
+        locked: !isSkinUnlocked(skin.id, profile.rankIndex)
+      }));
     this.setData({
       profile,
       rank,
@@ -66,6 +74,14 @@ Page({
   switchSkin(event) {
     const id = event.currentTarget.dataset.id;
     const profile = loadProfile();
+    if (!this.canSwitchSkin(profile)) {
+      wx.showToast({ title: '请先完善个人信息,游客不能切换工位', icon: 'none' });
+      return;
+    }
+    if (!isSkinUnlocked(id, profile.rankIndex)) {
+      wx.showToast({ title: '当前职级不够，晋升到第三关可解锁', icon: 'none' });
+      return;
+    }
     if (!profile.skins.includes(id)) return;
     profile.activeSkin = id;
     saveProfile(profile);
@@ -73,47 +89,41 @@ Page({
     this.refresh();
   },
 
+  canSwitchSkin(profile) {
+    return isFormalProfile(profile);
+  },
+
   manualCheckIn() {
     this.performCheckIn(false);
   },
 
   performCheckIn(auto) {
-    const profile = loadProfile();
-    const today = todayKey();
-    if (profile.lastCheckInDate === today) {
-      wx.showToast({ title: '今日已打卡', icon: 'none' });
+    if (!isFormalProfile(loadProfile())) {
+      if (!auto) wx.showToast({ title: '请先完善个人信息,游客不能打卡签到', icon: 'none' });
       return;
     }
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yKey = `${yesterday.getFullYear()}-${`${yesterday.getMonth() + 1}`.padStart(2, '0')}-${`${yesterday.getDate()}`.padStart(2, '0')}`;
-    profile.checkInStreak = profile.lastCheckInDate === yKey ? profile.checkInStreak + 1 : 1;
-    profile.checkInCount += 1;
-    profile.lastCheckInDate = today;
-
-    profile.items.bean = (profile.items.bean || 0) + 1;
-    const rewards = ['效率豆 +1'];
-    if (profile.checkInStreak >= 2 && profile.checkInStreak % 2 === 0) {
-      const skin = randomSkin(profile.rankIndex);
-      if (skin && !profile.skins.includes(skin.id)) {
-        profile.skins.push(skin.id);
-        rewards.push(`连续打卡赠送：${skin.name}`);
-      } else {
-        const item = randomFrom(ITEMS);
-        profile.items[item.id] = (profile.items[item.id] || 0) + 1;
-        rewards.push(`连续打卡赠送：${item.name}`);
+    const result = checkInProfile(auto);
+    if (!result.checkedIn) {
+      if (!auto && result.reason === 'already_checked_in') {
+        wx.showToast({ title: '今日已打卡', icon: 'none' });
+      } else if (!auto && result.reason === 'profile_not_ready') {
+        wx.showToast({ title: '请先补全头像昵称宣言', icon: 'none' });
       }
+      return;
     }
-    saveProfile(profile);
     this.setData({
       checkInModal: {
-        auto,
-        copy: randomFrom(CHECKIN_TEXTS),
-        reward: rewards.join('、')
+        auto: result.modal.auto,
+        copy: result.modal.copy,
+        reward: result.modal.reward
       }
     });
-    trackEvent('check_in', { auto, streak: profile.checkInStreak });
     this.refresh();
+  },
+
+  tryAutoCheckInFromAppShow() {
+    if (!shouldAutoCheckIn(loadProfile())) return;
+    this.performCheckIn(true);
   },
 
   closeCheckIn() {

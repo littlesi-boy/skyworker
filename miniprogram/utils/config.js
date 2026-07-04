@@ -1,27 +1,27 @@
 const RANKS = [
-  { title: '短期兼职外包', tier: '底层牛马', drainBonus: 0, events: 1, threshold: 3, normalScore: 1, perfectScore: 2, workspace: '破旧折叠工位，无电脑，桌面杂乱' },
-  { title: '长期外包', tier: '底层牛马', drainBonus: 0.2, events: 1, threshold: 6, normalScore: 1, perfectScore: 2, workspace: '老旧台式电脑，桌面满屏bug弹窗' },
-  { title: '预备正式工', tier: '基层过渡', drainBonus: 0.4, events: 2, threshold: 10, normalScore: 1, perfectScore: 2, workspace: '全新单屏办公工位，摆放代码文档' },
-  { title: '正式工', tier: '基层牛马', drainBonus: 0.6, events: 2, threshold: 18, normalScore: 1, perfectScore: 2, workspace: '标准职场工位，桌面增加绿植' },
-  { title: '技术组长', tier: '基层管理', drainBonus: 0.8, events: 2, threshold: 30, normalScore: 1, perfectScore: 2, workspace: '双屏开发工位，实时组员消息弹窗' },
-  { title: '部门经理', tier: '中层管理', drainBonus: 1.1, events: 3, threshold: 50, normalScore: 1, perfectScore: 2, workspace: '独立玻璃隔间，高频会议提醒' },
-  { title: '团队经理', tier: '中高层管理', drainBonus: 1.4, events: 3, threshold: 80, normalScore: 1, perfectScore: 2, workspace: '独立单人办公室，跨部门沟通消息' },
-  { title: '大区经理', tier: '高层管理', drainBonus: 1.7, events: 3, threshold: 120, normalScore: 1, perfectScore: 2, workspace: '落地窗高管办公室，全天项目会议' },
-  { title: '轮值CTO', tier: '准顶层高管', drainBonus: 2, events: 4, threshold: 180, normalScore: 1, perfectScore: 2, workspace: '顶层全景办公室，全天线上故障预警' },
-  { title: '集团常务CTO', tier: '职场天花板', drainBonus: 2.3, events: 4, threshold: 260, normalScore: 1, perfectScore: 2, workspace: '总裁顶层办公室，城市天际线背景，永久毕业标识' }
+  { title: '短期兼职外包', tier: '底层牛马', drainBonus: 0, events: 0, threshold: 3, normalScore: 1, perfectScore: 2, workspace: '破旧折叠工位，无电脑，桌面杂乱' },
+  { title: '长期外包', tier: '底层牛马', drainBonus: 0.1, events: 1, threshold: 6, normalScore: 1, perfectScore: 2, workspace: '老旧台式电脑，桌面满屏bug弹窗' },
+  { title: '预备正式工', tier: '基层过渡', drainBonus: 0.2, events: 1, threshold: 10, normalScore: 1, perfectScore: 2, workspace: '全新单屏办公工位，摆放代码文档' },
+  { title: '正式工', tier: '基层牛马', drainBonus: 0.35, events: 2, threshold: 18, normalScore: 1, perfectScore: 2, workspace: '标准职场工位，桌面增加绿植' },
+  { title: '技术组长', tier: '基层管理', drainBonus: 0.5, events: 2, threshold: 30, normalScore: 1, perfectScore: 2, workspace: '双屏开发工位，实时组员消息弹窗' },
+  { title: '部门经理', tier: '中层管理', drainBonus: 0.7, events: 2, threshold: 50, normalScore: 1, perfectScore: 2, workspace: '独立玻璃隔间，高频会议提醒' },
+  { title: '团队经理', tier: '中高层管理', drainBonus: 0.9, events: 3, threshold: 80, normalScore: 1, perfectScore: 2, workspace: '独立单人办公室，跨部门沟通消息' },
+  { title: '大区经理', tier: '高层管理', drainBonus: 1.1, events: 3, threshold: 120, normalScore: 1, perfectScore: 2, workspace: '落地窗高管办公室，全天项目会议' },
+  { title: '轮值CTO', tier: '准顶层高管', drainBonus: 1.35, events: 3, threshold: 180, normalScore: 1, perfectScore: 2, workspace: '顶层全景办公室，全天线上故障预警' },
+  { title: '集团常务CTO', tier: '职场天花板', drainBonus: 1.6, events: 4, threshold: 260, normalScore: 1, perfectScore: 2, workspace: '总裁顶层办公室，城市天际线背景，永久毕业标识' }
 ];
 
 const GAME = {
-  duration: 40,
+  duration: 36,
   passLine: 0,
-  perfectLine: 40,
-  progressDrain: 3,
-  moodDrain: 1.3,
+  perfectLine: 25,
+  progressDrain: 2,
+  moodDrain: 1.5,
   progressTap: 3,
   moodTap: 4,
   overtimeAt: [30, 15],
-  initialProgress: 72,
-  initialMood: 72
+  initialProgress: 80,
+  initialMood: 80
 };
 
 const INTERFERENCE = {
@@ -37,11 +37,21 @@ const INTERFERENCE = {
   growMoodDamage: 2,
   smallMoodDamage: 2,
   bigMoodDamage: 3,
-  needleDropChance: 0.35
+  needleDropChance: 0.35,
+  freezeRankLimit: 4,
+  freezeDropStart: 8,
+  freezeDropEnd: 18,
+  freezeDuration: 5,
+  slowdownDropStart: 10,
+  slowdownDropEnd: 22,
+  slowdownDuration: 8,
+  slowdownDrain: 1,
+  slowdownFallFactor: 0.45,
+  slowdownGrowAfter: 7
 };
 
 const EVENTS = [
-  { title: '线上突发bug', desc: '开发进度瞬间扣除20%', progress: -20, mood: 0 },
+  { title: '线上突发bug', desc: '开发进度扣除20%，心态同步扣除25%', progress: -20, mood: -25 },
   { title: '下班临时排障通知', desc: '心态值瞬间扣除15%', progress: 0, mood: -15 },
   { title: '需求临时变更', desc: '双数值同步扣除10%', progress: -10, mood: -10 }
 ];
@@ -50,44 +60,50 @@ const OVERTIME = {
   normal: {
     title: '部门加班通知',
     desc: '版本即将上线，需要临时增补开发功能，是否自愿留下来加班？',
-    accept: '接受加班（获取积分加成+随机道具）',
+    accept: '接受加班',
+    acceptNote: '时长+8s · 积分加成 · 随机道具×2 · 心态-10 · 心态流失提升至每秒2',
     reject: '准时下班（无收益无惩罚，正常对局）',
     normalMultiplier: 1.5,
     perfectMultiplier: 2,
-    progressDrain: 0.6,
-    moodDrain: 0.4,
+    progressDrain: 0,
+    moodDrain: 0.5,
     extraEvents: 1,
-    items: 1,
-    moodCapDrop: 0
+    items: 2,
+    acceptMoodPenalty: 10,
+    extraTime: 8
   },
   night: {
     title: '紧急运维通知',
     desc: '线上出现重大系统故障，需要通宵留守排查问题，是否接受通宵加班？',
-    accept: '接受通宵加班（高额积分加成+永久工位皮肤+双道具）',
+    accept: '接受通宵加班',
+    acceptNote: '时长+8s · 普通*2 / 完美*3 · 随机道具×4 · 高级工位 · 心态-10 · 心态流失提升至每秒2',
     reject: '准时下班（无收益无惩罚，正常对局）',
     normalMultiplier: 2,
     perfectMultiplier: 3,
-    progressDrain: 1,
-    moodDrain: 0.7,
+    progressDrain: 0,
+    moodDrain: 0.5,
     extraEvents: 2,
-    items: 2,
-    moodCapDrop: 15,
-    skinId: 'night-ops'
+    items: 4,
+    acceptMoodPenalty: 10,
+    skinId: 'night-ops',
+    extraTime: 8
   }
 };
 
 const ITEMS = [
-  { id: 'time', name: '延时缓冲卡', icon: '⏱', desc: '本局对局时长+10s，加班模式额外+5s' },
-  { id: 'mood', name: '心态回血卡', icon: '☕', desc: '一键恢复50%心态值，加班模式提升30%' },
-  { id: 'progress', name: '工作加急卡', icon: '⚡', desc: '一键恢复50%开发进度，加班模式提升20%' },
+  { id: 'mood', name: '心态回血卡', icon: '☕', desc: '心态值+20%' },
+  { id: 'progress', name: '工作加急卡', icon: '⚡', desc: '点击开发进度+15%，心态值-8%' },
   { id: 'needle', name: '破Bug针', icon: '📌', desc: '刺破正在下落的bug球，本局和下局都可使用' },
+  { id: 'freeze', name: '冻结雪花', icon: '❄️', desc: '5秒内冻结开发进度和心态指数，不再扣减数值' },
+  { id: 'slowdown', name: '宕速球', icon: '🧊', desc: '8秒内双数值每秒仅扣1，并延缓bug球下落和变大' },
   { id: 'bean', name: '效率豆', icon: '🫘', desc: '点击开发进度+8、心态值+4，长按蓄力开发进度+15、心态值+8' },
   { id: 'mindstone', name: '心态石', icon: '💗', desc: '点击心态值+8、开发进度+4，长按蓄力心态值+15、开发进度+8' }
 ];
 
 const SKINS = [
-  { id: 'default', name: '低调护眼工位', rarity: '基础', tone: 'calm', gradient: 'linear-gradient(145deg,#eef5e9,#f8faf0)' },
-  { id: 'bug-blue', name: '深夜修复蓝屏', rarity: '稀有', tone: 'blue', gradient: 'linear-gradient(145deg,#eaf4ff,#eef5e9)' },
+  { id: 'default', name: '天选打工人工位', rarity: '基础', tone: 'chosen', gradient: 'linear-gradient(145deg,#eef5e9,#fff8e8)' },
+  { id: 'eye-care', name: '低调护眼工位', rarity: '基础', tone: 'calm', gradient: 'linear-gradient(145deg,#e1f4dc,#f5fbef)' },
+  { id: 'dark-knight', name: '暗夜骑士工位', rarity: '基础', tone: 'knight', unlockRankIndex: 3, gradient: 'linear-gradient(145deg,#101820,#25313a)' },
   { id: 'mint-focus', name: '薄荷专注舱', rarity: '稀有', tone: 'green', gradient: 'linear-gradient(145deg,#e7f7ee,#fbfcf4)' },
   { id: 'sunset-release', name: '橙光发布台', rarity: '史诗', tone: 'orange', gradient: 'linear-gradient(145deg,#fff2df,#eaf4ff)' },
   { id: 'aurora-cto', name: '极光CTO顶楼', rarity: '传说', tone: 'aurora', gradient: 'linear-gradient(145deg,#e7fff7,#f4edff)' },

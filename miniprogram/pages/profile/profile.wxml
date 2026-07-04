@@ -27,6 +27,13 @@
       <text class="row-label">自动打卡</text>
       <switch checked="{{profile.autoCheckIn}}" bindchange="toggleAutoCheckIn" color="#2f5f50" />
     </view>
+    <view class="info-row stack-row">
+      <view class="row-copy">
+        <text class="row-label">匿名排行榜</text>
+        <text class="row-note">仅同步脱敏代号和成绩，不上传头像昵称原文</text>
+      </view>
+      <switch checked="{{profile.leaderboardEnabled}}" bindchange="toggleLeaderboard" color="#2f5f50" />
+    </view>
     <view class="info-row">
       <text class="row-label">今日打卡</text>
       <button class="mini primary-btn" bindtap="manualCheckIn">{{checkedInToday ? '已完成' : '手动打卡'}}</button>

@@ -1,0 +1,46 @@
+<view class="safe-page ranking-page skin-{{activeSkin.tone}}">
+  <view class="rank-hero soft-card">
+    <view>
+      <text class="hero-title">匿名排行榜</text>
+      <text class="hero-copy">{{profile.leaderboardEnabled ? '已开启匿名入榜' : '未开启匿名入榜'}}</text>
+    </view>
+    <switch checked="{{profile.leaderboardEnabled}}" bindchange="toggleLeaderboard" color="#2f5f50" />
+  </view>
+
+  <view class="privacy-card soft-card">
+    <text class="privacy-title">隐私展示规则</text>
+    <text class="privacy-copy">仅展示脱敏代号、段位、晋升积分、通关和完美通关次数；不展示头像、微信昵称、宣言、背包和历史对局明细。</text>
+  </view>
+
+  <view class="mine-card soft-card">
+    <view>
+      <text class="mine-label">我的匿名排名</text>
+      <text class="mine-rank">{{mineRankText}}</text>
+    </view>
+    <view class="mine-score">
+      <text>{{profile.totalScore}}</text>
+      <text>积分</text>
+    </view>
+  </view>
+
+  <view class="board soft-card">
+    <view class="board-head">
+      <text>全服匿名榜</text>
+      <button class="ghost-btn mini" bindtap="fetchRankings">{{loading ? '加载中' : '刷新'}}</button>
+    </view>
+    <view wx:if="{{!profile.leaderboardEnabled}}" class="empty-state">开启后才会同步成绩并查看自己的排名。</view>
+    <view wx:elif="{{loading}}" class="empty-state">正在加载排行榜</view>
+    <view wx:elif="{{!rankings.length}}" class="empty-state">暂无入榜数据</view>
+    <view wx:else class="rank-list">
+      <view class="rank-row {{item.isMine ? 'mine' : ''}}" wx:for="{{rankings}}" wx:key="leaderboardId">
+        <text class="rank-no">{{item.position}}</text>
+        <view class="anon-avatar">{{item.avatarText}}</view>
+        <view class="rank-info">
+          <text class="rank-name">{{item.displayName}}</text>
+          <text class="rank-meta">{{item.rankTitle}} · 通关{{item.passCount}} · 完美{{item.perfectCount}}</text>
+        </view>
+        <text class="rank-score">{{item.totalScore}}</text>
+      </view>
+    </view>
+  </view>
+</view>

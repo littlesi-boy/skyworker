@@ -36,18 +36,19 @@
   </view>
 
   <view class="tabs">
-    <button class="tab {{activeTab === 'skins' ? 'active' : ''}}" data-tab="skins" bindtap="switchTab">我的皮肤</button>
+    <button class="tab {{activeTab === 'skins' ? 'active' : ''}}" data-tab="skins" bindtap="switchTab">我的工位</button>
     <button class="tab {{activeTab === 'growth' ? 'active' : ''}}" data-tab="growth" bindtap="switchTab">成长档案</button>
     <button class="tab {{activeTab === 'records' ? 'active' : ''}}" data-tab="records" bindtap="switchTab">历史</button>
   </view>
 
   <view wx:if="{{activeTab === 'skins'}}" class="panel">
     <view class="skin-grid">
-      <view class="skin-card soft-card {{profile.activeSkin === item.id ? 'selected' : ''}}" wx:for="{{ownedSkins}}" wx:key="id">
+      <view class="skin-card soft-card {{profile.activeSkin === item.id ? 'selected' : ''}} {{item.locked ? 'locked' : ''}}" wx:for="{{ownedSkins}}" wx:key="id">
+        <view class="skin-lock" wx:if="{{item.locked}}">🔒</view>
         <view class="skin-preview tone-{{item.tone}}"></view>
         <text class="skin-name">{{item.name}}</text>
-        <text class="skin-rarity">{{item.rarity}}</text>
-        <button class="ghost-btn mini" data-id="{{item.id}}" bindtap="switchSkin">{{profile.activeSkin === item.id ? '使用中' : '切换'}}</button>
+        <text class="skin-rarity">{{item.locked ? '第三关解锁' : item.rarity}}</text>
+        <button class="ghost-btn mini" data-id="{{item.id}}" bindtap="switchSkin">{{item.locked ? '未解锁' : (profile.activeSkin === item.id ? '使用中' : '切换')}}</button>
       </view>
     </view>
   </view>

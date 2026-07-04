@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/work/work",
+    "pages/ranking/ranking",
     "pages/space/space",
     "pages/profile/profile"
   ],
@@ -19,6 +20,10 @@
       {
         "pagePath": "pages/work/work",
         "text": "上工"
+      },
+      {
+        "pagePath": "pages/ranking/ranking",
+        "text": "排行"
       },
       {
         "pagePath": "pages/space/space",

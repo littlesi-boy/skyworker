@@ -1,5 +1,5 @@
-const { RANKS, SKINS, ITEMS, CHECKIN_TEXTS } = require('../../utils/config');
-const { isProfileReady, loadProfile, saveProfile, randomFrom, randomSkin, todayKey, trackEvent } = require('../../utils/store');
+const { RANKS, SKINS } = require('../../utils/config');
+const { isProfileReady, isFormalProfile, loadProfile, saveProfile, todayKey, trackEvent, shouldAutoCheckIn, checkInProfile } = require('../../utils/store');
 
 Page({
   data: {
@@ -17,6 +17,10 @@ Page({
 
   onShow() {
     this.refresh();
+    if (wx.getStorageSync('pendingAutoCheckIn')) {
+      wx.removeStorageSync('pendingAutoCheckIn');
+      this.tryAutoCheckInFromAppShow();
+    }
   },
 
   refresh() {
@@ -120,46 +124,72 @@ Page({
     this.refresh();
   },
 
+  toggleLeaderboard(event) {
+    const enabled = !!event.detail.value;
+    const profile = loadProfile();
+    if (enabled && !isProfileReady(profile)) {
+      wx.showToast({ title: '请先完善个人信息,游客不能查看排行榜', icon: 'none' });
+      this.refresh();
+      return;
+    }
+    if (!enabled) {
+      profile.friendAuth = false;
+      profile.leaderboardEnabled = false;
+      saveProfile(profile);
+      trackEvent('leaderboard_toggle', { enabled: false, from: 'profile' });
+      this.refresh();
+      return;
+    }
+    wx.showModal({
+      title: '开启匿名排行榜',
+      content: '开启后仅同步脱敏代号、段位、晋升积分、通关次数和完美通关次数；不上传头像、微信昵称原文、宣言、背包和历史对局明细。',
+      confirmText: '开启',
+      success: (res) => {
+        if (!res.confirm) {
+          this.refresh();
+          return;
+        }
+        profile.privacyAccepted = true;
+        profile.friendAuth = true;
+        profile.leaderboardEnabled = true;
+        saveProfile(profile);
+        trackEvent('leaderboard_toggle', { enabled: true, from: 'profile' });
+        this.refresh();
+      }
+    });
+  },
+
   manualCheckIn() {
     this.performCheckIn(false);
   },
 
   performCheckIn(auto) {
-    const profile = loadProfile();
-    const today = todayKey();
-    if (profile.lastCheckInDate === today) {
-      wx.showToast({ title: '今日已打卡', icon: 'none' });
+    if (!isFormalProfile(loadProfile())) {
+      if (!auto) wx.showToast({ title: '请先完善个人信息,游客不能打卡签到', icon: 'none' });
       return;
     }
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yKey = `${yesterday.getFullYear()}-${`${yesterday.getMonth() + 1}`.padStart(2, '0')}-${`${yesterday.getDate()}`.padStart(2, '0')}`;
-    profile.checkInStreak = profile.lastCheckInDate === yKey ? profile.checkInStreak + 1 : 1;
-    profile.checkInCount += 1;
-    profile.lastCheckInDate = today;
-    profile.items.bean = (profile.items.bean || 0) + 1;
-    const rewards = ['效率豆 +1'];
-    if (profile.checkInStreak >= 2 && profile.checkInStreak % 2 === 0) {
-      const skin = randomSkin(profile.rankIndex);
-      if (skin && !profile.skins.includes(skin.id)) {
-        profile.skins.push(skin.id);
-        rewards.push(`连续打卡赠送：${skin.name}`);
-      } else {
-        const item = randomFrom(ITEMS);
-        profile.items[item.id] = (profile.items[item.id] || 0) + 1;
-        rewards.push(`连续打卡赠送：${item.name}`);
+    const result = checkInProfile(auto);
+    if (!result.checkedIn) {
+      if (!auto && result.reason === 'already_checked_in') {
+        wx.showToast({ title: '今日已打卡', icon: 'none' });
+      } else if (!auto && result.reason === 'profile_not_ready') {
+        wx.showToast({ title: '请先补全头像昵称宣言', icon: 'none' });
       }
+      return;
     }
-    saveProfile(profile);
     this.setData({
       checkInModal: {
-        auto,
-        copy: randomFrom(CHECKIN_TEXTS),
-        reward: rewards.join('、')
+        auto: result.modal.auto,
+        copy: result.modal.copy,
+        reward: result.modal.reward
       }
     });
-    trackEvent('check_in', { auto, streak: profile.checkInStreak });
     this.refresh();
+  },
+
+  tryAutoCheckInFromAppShow() {
+    if (!shouldAutoCheckIn(loadProfile())) return;
+    this.performCheckIn(true);
   },
 
   closeCheckIn() {
@@ -169,7 +199,7 @@ Page({
   clearRecords() {
     wx.showModal({
       title: '清空个人战绩',
-      content: '将清空积分、段位、统计和历史记录，保留头像昵称、皮肤和道具。',
+      content: '将清空积分、段位、统计和历史记录，保留头像昵称工位和道具。',
       confirmText: '清空',
       confirmColor: '#8f3a3a',
       success: (res) => {

@@ -4,6 +4,19 @@
   background: linear-gradient(145deg, #eef5e9, #f8faf0);
 }
 
+.skin-chosen {
+  background: linear-gradient(145deg, #eef5e9, #fff8e8);
+}
+
+.skin-calm {
+  background: linear-gradient(145deg, #e1f4dc, #f5fbef);
+}
+
+.skin-knight {
+  color: #f5f7f3;
+  background: linear-gradient(145deg, #101820, #25313a);
+}
+
 .skin-blue {
   background: linear-gradient(145deg, #eaf4ff, #eef5e9);
 }
@@ -103,6 +116,19 @@
   color: #27312d;
   font-size: 28rpx;
   font-weight: 700;
+}
+
+.row-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.row-note {
+  color: #7a827b;
+  font-size: 22rpx;
+  line-height: 1.35;
 }
 
 .row-value {

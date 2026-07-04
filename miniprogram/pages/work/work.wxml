@@ -1,4 +1,89 @@
-<view class="safe-page work-page skin-{{activeSkin.tone}}">
+<view class="safe-page work-page skin-{{activeSkin.tone}} {{showHome ? 'home-active' : ''}}">
+  <view class="welcome-toast" wx:if="{{welcomeToast}}">
+    <view class="welcome-band"></view>
+    <view class="welcome-copy">
+      <text class="welcome-mark">✦</text>
+      <text class="welcome-title">亲爱的天选打工人</text>
+      <text class="welcome-text">欢迎来到天工一号</text>
+    </view>
+  </view>
+  <block wx:if="{{showHome}}">
+    <view class="home-scene">
+      <view class="sun-panel">
+        <text class="home-title">天工一号</text>
+        <text class="home-title sub">码农大闯关</text>
+      </view>
+      <view class="sky-panel">
+        <view class="cloud cloud-a"></view>
+        <view class="cloud cloud-b"></view>
+        <view class="grass grass-a"></view>
+        <view class="grass grass-b"></view>
+        <view class="grass grass-c"></view>
+        <view class="rope-label work-label">工作</view>
+        <view class="rope-label life-label">生活</view>
+        <view class="balance-rope rope-one"></view>
+        <view class="balance-rope rope-two"></view>
+        <view class="rope-pin pin-left"></view>
+        <view class="rope-pin pin-right"></view>
+
+        <view class="runner">
+          <view class="hair tuft-a"></view>
+          <view class="hair tuft-b"></view>
+          <view class="head">
+            <view class="ear"></view>
+            <view class="face">
+              <view class="eye-glass left"></view>
+              <view class="eye-glass right"></view>
+              <view class="bridge"></view>
+              <view class="nose"></view>
+              <view class="smile"></view>
+            </view>
+          </view>
+          <view class="neck"></view>
+          <view class="body">
+            <view class="shirt-line v1"></view>
+            <view class="shirt-line v2"></view>
+            <view class="shirt-line h1"></view>
+            <view class="shirt-line h2"></view>
+            <view class="shirt-line h3"></view>
+          </view>
+          <view class="arm arm-back"><view class="hand"></view></view>
+          <view class="arm arm-front"><view class="hand"></view></view>
+          <view class="leg leg-back"><view class="shoe"></view></view>
+          <view class="leg leg-front"><view class="shoe"></view></view>
+        </view>
+      </view>
+      <view class="pillar-wrap">
+        <view class="pillar pillar-left"></view>
+        <view class="pillar pillar-mid"></view>
+        <view class="pillar pillar-right"></view>
+      </view>
+      <view class="home-start {{homeLoading ? 'loading' : ''}}">
+        <text>{{homeLoading ? '加载中' : '进入游戏'}}</text>
+      </view>
+      <button class="sound-toggle" bindtap="toggleHomeBgm">
+        <text>{{homeMuted ? '♪' : '♫'}}</text>
+      </button>
+      <view class="compliance">
+        <text class="advice-title">健康游戏忠告</text>
+        <text>抵制不良游戏，拒绝盗版游戏。注意自我保护，谨防受骗上当。</text>
+        <text>适度游戏益脑，沉迷游戏伤身。合理安排时间，享受健康生活。</text>
+        <text>著作权人：杭州斯滑工作室</text>
+        <view class="load-row">
+          <view class="load-track">
+            <view class="load-fill" style="width: {{homeProgress}}%;"></view>
+          </view>
+          <view class="age-badge">
+            <text class="age-main">8+</text>
+            <text class="age-mid">CADPA</text>
+            <text class="age-small">适龄提示</text>
+          </view>
+        </view>
+        <text class="load-text">{{homeProgressText}} ({{homeProgress}}%)</text>
+      </view>
+    </view>
+  </block>
+  <block wx:else>
   <view class="topbar">
     <view class="rank-block">
       <text class="rank-title">{{rank.title}}</text>
@@ -13,7 +98,23 @@
     <view class="meters">
       <view class="meter-zone progress-zone" bindtap="tapProgress">
         <view class="machine-tag">开发终端</view>
+        <view class="zone-fx progress-zone-fx"></view>
         <view class="dev-device">
+          <view class="zone-effects progress-effects">
+            <view wx:for="{{progressEffectList}}" wx:key="id" class="meter-effect {{item.cls}}" style="left: {{item.leftPx}}px; top: {{item.topPx}}px;">
+              <text>{{item.text}}</text>
+            </view>
+          </view>
+          <view class="value-axis progress-axis">
+            <view class="axis-top-meter"></view>
+            <view class="axis-line"></view>
+            <view class="axis-thumb" style="bottom: {{progress}}%;"></view>
+          </view>
+          <view class="progress-gauge">
+            <view class="progress-gauge-dot"></view>
+            <view class="gauge-ticks"></view>
+            <view class="progress-gauge-bar" style="width: {{progress}}%;"></view>
+          </view>
           <view class="code-screen">
             <view class="scan-line"></view>
             <view class="code-fill" style="height: {{progress}}%;">
@@ -28,6 +129,14 @@
             </view>
             <view class="screen-glare"></view>
             <view class="perfect-line device-line"></view>
+            <view class="freeze-cover progress-freeze-cover" wx:if="{{freezeActive}}">
+              <view class="ice-crack crack-a"></view>
+              <view class="ice-crack crack-b"></view>
+              <view class="ice-snow snow-a">❄</view>
+              <view class="ice-snow snow-b">✦</view>
+              <view class="ice-snow snow-c">❄</view>
+              <text class="freeze-label">冻结</text>
+            </view>
           </view>
         </view>
         <text class="meter-value">{{progressText}}%</text>
@@ -37,9 +146,21 @@
 
       <view class="meter-zone mood-zone" bindtap="tapMood">
         <view class="machine-tag mood-tag">心态反应炉</view>
+        <view class="zone-fx mood-zone-fx"></view>
         <view class="mood-device mood-{{moodLevel}}">
+          <view class="zone-effects mood-effects">
+            <view wx:for="{{moodEffectList}}" wx:key="id" class="meter-effect {{item.cls}}" style="left: {{item.leftPx}}px; top: {{item.topPx}}px;">
+              <text>{{item.text}}</text>
+            </view>
+          </view>
+          <view class="value-axis mood-axis">
+            <view class="axis-top-meter"></view>
+            <view class="axis-line"></view>
+            <view class="axis-thumb" style="bottom: {{mood}}%;"></view>
+          </view>
           <view class="pressure-gauge">
             <view class="gauge-dot"></view>
+            <view class="gauge-ticks"></view>
             <view class="gauge-bar" style="width: {{mood}}%;"></view>
           </view>
           <view class="mood-glass">
@@ -66,6 +187,14 @@
             <view class="mood-mark left"></view>
             <view class="mood-mark right"></view>
             <view class="perfect-line mood-line"></view>
+            <view class="freeze-cover mood-freeze-cover" wx:if="{{freezeActive}}">
+              <view class="ice-crack crack-a"></view>
+              <view class="ice-crack crack-b"></view>
+              <view class="ice-snow snow-a">❄</view>
+              <view class="ice-snow snow-b">✦</view>
+              <view class="ice-snow snow-c">❄</view>
+              <text class="freeze-label">冻结</text>
+            </view>
           </view>
           <view class="mood-label">心态舱</view>
         </view>
@@ -76,14 +205,39 @@
     </view>
 
     <view class="event-toast" wx:if="{{eventToast}}">
+      <view class="robot-float toast-robot">
+        <image class="robot-float-img" src="/assets/img/robot.png" mode="aspectFit"></image>
+        <view class="robot-eye left"></view>
+        <view class="robot-eye right"></view>
+      </view>
       <text class="event-title">{{eventToast.title}}</text>
       <text>{{eventToast.desc}}</text>
     </view>
 
+    <view class="freeze-toast" wx:if="{{freezeToast}}">
+      <view class="robot-float toast-robot">
+        <image class="robot-float-img" src="/assets/img/robot.png" mode="aspectFit"></image>
+        <view class="robot-eye left"></view>
+        <view class="robot-eye right"></view>
+      </view>
+      <text class="freeze-toast-mark">❄</text>
+      <view class="freeze-toast-copy">
+        <text class="freeze-toast-title">{{freezeToast.title}}</text>
+        <text>{{freezeToast.desc}}</text>
+      </view>
+      <text class="freeze-toast-mark">❄</text>
+    </view>
+
     <view class="overtime-pop soft-card" wx:if="{{overtimeModal}}">
+      <view class="robot-float">
+        <image class="robot-float-img" src="/assets/img/robot.png" mode="aspectFit"></image>
+        <view class="robot-eye left"></view>
+        <view class="robot-eye right"></view>
+      </view>
       <text class="overtime-title">【{{overtimeModal.title}}】</text>
       <text class="overtime-desc">{{overtimeModal.desc}}</text>
       <button class="primary-btn tiny" bindtap="acceptOvertime">{{overtimeModal.accept}}</button>
+      <text class="overtime-note">{{overtimeModal.acceptNote}}</text>
       <button class="ghost-btn tiny" bindtap="rejectOvertime">{{overtimeModal.reject}}</button>
     </view>
 
@@ -105,11 +259,18 @@
       <text class="workspace-desc">{{rank.workspace}}</text>
     </view>
 
-    <view class="item-dock">
-      <button class="item-btn" wx:for="{{itemDock}}" wx:key="id" data-id="{{item.id}}" bindtap="useItem">
-        <text class="item-icon">{{item.icon}}</text>
-        <text class="item-count">x{{item.count}}</text>
-        <text class="item-name">{{item.shortName}}</text>
+    <view class="item-dock-wrap">
+      <scroll-view class="item-dock" scroll-x scroll-with-animation scroll-left="{{itemDockScrollLeft}}" enhanced show-scrollbar="{{false}}" bindtouchstart="onItemDockTouchStart" bindtouchend="onItemDockTouchEnd">
+        <view class="item-track">
+          <button class="item-btn" wx:for="{{visibleItemDock}}" wx:key="id" data-id="{{item.id}}" bindtap="useItem">
+            <text class="item-icon">{{item.icon}}</text>
+            <text class="item-count">x{{item.count}}</text>
+            <text class="item-name">{{item.shortName}}</text>
+          </button>
+        </view>
+      </scroll-view>
+      <button class="item-scroll-btn {{itemDockScrolled ? 'left' : 'right'}}" bindtap="toggleItemDockScroll">
+        <text>{{itemDockScrolled ? '‹' : '›'}}</text>
       </button>
     </view>
   </view>
@@ -122,22 +283,79 @@
 
   <view class="modal-mask" wx:if="{{resultModal}}">
     <view class="result-card soft-card {{resultModal.type}}">
+      <view class="robot-float">
+        <image class="robot-float-img" src="/assets/img/robot.png" mode="aspectFit"></image>
+        <view class="robot-eye left"></view>
+        <view class="robot-eye right"></view>
+      </view>
       <view class="mascot">{{resultModal.type === 'success' ? '✦' : '☁'}}</view>
       <text class="result-title">{{resultModal.title}}</text>
       <text class="result-copy">{{resultModal.copy}}</text>
       <view class="reward-list" wx:if="{{resultModal.rewards.length}}">
         <text wx:for="{{resultModal.rewards}}" wx:key="*this" class="reward-chip">{{item}}</text>
       </view>
-      <view class="result-actions" wx:if="{{resultModal.type === 'fail'}}">
-        <button class="primary-btn" bindtap="reviveByAd">观看广告，原地复活</button>
-        <button class="ghost-btn" bindtap="reviveByShare">分享好友，免费复活</button>
+      <view class="result-actions" wx:if="{{resultModal.type === 'fail' && resultModal.bonusBean}}">
+        <button class="primary-btn" bindtap="claimFailureBean">确认领取</button>
+        <button class="ghost-btn" bindtap="closeResult">暂不领取</button>
+      </view>
+      <view class="result-actions" wx:elif="{{resultModal.type === 'fail'}}">
+        <button class="primary-btn" bindtap="reviveByAd">答题挑战，原地复活</button>
+        <button class="ghost-btn" bindtap="closeResult">关闭退出</button>
       </view>
       <button class="ghost-btn" bindtap="closeResult">{{resultModal.type === 'success' ? '收下奖励' : '关闭退出'}}</button>
     </view>
   </view>
 
+  <view class="modal-mask" wx:if="{{reviveExamModal}}">
+    <view class="exam-card soft-card">
+      <view class="robot-float">
+        <image class="robot-float-img" src="/assets/img/robot.png" mode="aspectFit"></image>
+        <view class="robot-eye left"></view>
+        <view class="robot-eye right"></view>
+      </view>
+      <view class="mascot">?</view>
+      <text class="result-title">复活答题</text>
+      <text class="result-copy">开发题和心态题各答对 1 题即可原地复活。</text>
+      <view class="exam-list">
+        <view class="exam-question" wx:for="{{reviveExamModal.questions}}" wx:for-index="qIndex" wx:key="id">
+          <text class="exam-tag">{{item.label}}</text>
+          <text class="exam-title">{{qIndex + 1}}. {{item.question}}</text>
+          <view class="exam-options" wx:if="{{item.type === 'choice'}}">
+            <button
+              class="exam-option {{reviveExamModal.answers[qIndex] === option.key ? 'selected' : ''}}"
+              wx:for="{{item.displayOptions}}"
+              wx:for-item="option"
+              wx:key="key"
+              data-index="{{qIndex}}"
+              data-value="{{option.key}}"
+              bindtap="chooseExamAnswer"
+            >{{option.label}}</button>
+          </view>
+          <input
+            wx:else
+            class="exam-input"
+            placeholder="输入答案"
+            data-index="{{qIndex}}"
+            value="{{reviveExamModal.answers[qIndex] || ''}}"
+            bindinput="inputExamAnswer"
+          />
+        </view>
+      </view>
+      <text class="exam-error" wx:if="{{reviveExamModal.error}}">{{reviveExamModal.error}}</text>
+      <view class="result-actions">
+        <button class="primary-btn" bindtap="submitReviveExam">提交复活</button>
+        <button class="ghost-btn" bindtap="closeResult">放弃复活</button>
+      </view>
+    </view>
+  </view>
+
   <view class="modal-mask" wx:if="{{checkInModal}}">
     <view class="result-card soft-card success">
+      <view class="robot-float">
+        <image class="robot-float-img" src="/assets/img/robot.png" mode="aspectFit"></image>
+        <view class="robot-eye left"></view>
+        <view class="robot-eye right"></view>
+      </view>
       <view class="mascot">✓</view>
       <text class="result-title">今日上工自动打卡成功</text>
       <text class="result-copy">{{checkInModal.copy}}</text>
@@ -147,4 +365,5 @@
       <button class="primary-btn" bindtap="closeCheckIn">知道了</button>
     </view>
   </view>
+  </block>
 </view>
